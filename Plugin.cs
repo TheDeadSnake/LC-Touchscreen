@@ -14,7 +14,6 @@ public class Plugin : BaseUnityPlugin
     internal static Sprite hoverIcon;
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        // Level1Experimentation
         if (scene.name.StartsWith("level", System.StringComparison.OrdinalIgnoreCase)) {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {
