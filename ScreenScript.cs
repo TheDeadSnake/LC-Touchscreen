@@ -76,24 +76,15 @@ namespace touchscreen {
             }
         }
 
-        private void OnPlayerUseInteraction(InputAction.CallbackContext ctx) {
-            OnPlayerInteraction(true);
-        }
-
-        private void OnPlayerInteractInteraction(InputAction.CallbackContext ctx) {
-            OnPlayerInteraction(false);
-        }
-
         public void OnEnable()
         {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply != null) {
-                foreach (InputAction x in LOCAL_PLAYER.playerActions)
-                {
+                foreach (InputAction x in LOCAL_PLAYER.playerActions) {
                     if (x.name.Equals("Interact"))
-                        x.performed += OnPlayerInteractInteraction;
+                        x.performed += _ => OnPlayerInteraction(false);
                     else if (x.name.Equals("Use"))
-                        x.performed += OnPlayerUseInteraction;
+                        x.performed += _ => OnPlayerInteraction(true);
                 }
             } else {
                 Plugin.LOGGER.LogWarning("Unable to activate monitor touchscreen. Reason: Failed to get local player.");
