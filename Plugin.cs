@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace touchscreen;
 
-[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.0.0")]
+[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.0.1")]
 public class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource LOGGER;
@@ -28,7 +28,7 @@ public class Plugin : BaseUnityPlugin
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         // Load hover icon
-        string path = Path.Combine(Paths.PluginPath, "TouchScreen", "HoverIcon.png");
+        string path = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen", "HoverIcon.png");
         if (File.Exists(path))
         {
             UnityWebRequest req = UnityWebRequestTexture.GetTexture(path);
