@@ -28,9 +28,8 @@ public class Plugin : BaseUnityPlugin
 
         // Load hover icon
         string path = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen", "HoverIcon.png");
-        if (File.Exists(path))
-        {
-            UnityWebRequest req = UnityWebRequestTexture.GetTexture(path);
+        if (File.Exists(path)) {
+            UnityWebRequest req = UnityWebRequestTexture.GetTexture(Utility.ConvertToWWWFormat(path));
             req.SendWebRequest().completed += _ => {
                 Texture2D tex = DownloadHandlerTexture.GetContent(req);
                 Plugin.hoverIcon = Sprite.Create(
@@ -40,8 +39,7 @@ public class Plugin : BaseUnityPlugin
                     100f
                 );
             };
-        }
-        else
+        } else
             LOGGER.LogWarning(" > Unable to locate hover icon at path: " + path);
         LOGGER.LogInfo("Enabled TouchScreen");
     }
