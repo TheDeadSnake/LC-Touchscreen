@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -28,6 +29,7 @@ public class Plugin : BaseUnityPlugin
 
     private void Awake() {
         Plugin.LOGGER = this.Logger;
+        string pluginFolder = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen");
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         // Load config values
@@ -51,10 +53,18 @@ public class Plugin : BaseUnityPlugin
             For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
             """
         );
+        ConfigEntry<string> imagePath = this.Config.Bind(
+            "UI", "PointerIcon",
+            "HoverIcon.png",
+            String.Format("""
+            You can either choose one of the three default icons "HoverIcon.png", "CrossIcon.png", "DotIcon.png" or
+            create your own (Only .png and .jpg are supported) and place it in: {0}
+            """, pluginFolder)
+        );
 
         // Load hover icon
-        string path = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen", "HoverIcon.png"); // Only .png and .jpg are supported
-        if (File.Exists(path)) {
+        string path = Path.Combine(pluginFolder, imagePath.Value); // Only .png and .jpg are supported
+        if (File.Exists(path) && (path.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))) {
             UnityWebRequest req = UnityWebRequestTexture.GetTexture(Utility.ConvertToWWWFormat(path));
             req.SendWebRequest().completed += _ => {
                 Texture2D tex = DownloadHandlerTexture.GetContent(req);
