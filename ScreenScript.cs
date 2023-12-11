@@ -12,6 +12,8 @@ namespace touchscreen {
         private static ManualCameraRenderer MAP_RENDERER => StartOfRound.Instance?.mapScreen;
         private const float _isCloseMax = 1.25f;
         private bool _lookingAtMonitor = false;
+        private InputAction _primary;
+        private InputAction _secondary;
 
         private Bounds GetBounds() {
             // Magic values are the offset from the monitor object center
@@ -77,19 +79,74 @@ namespace touchscreen {
             }
         }
 
-        private void OnEnable()
-        {
-            PlayerControllerB ply = LOCAL_PLAYER;
-            if (ply != null) {
-                foreach (InputAction x in LOCAL_PLAYER.playerActions) {
-                    if (x.name.Equals("Interact"))
-                        x.performed += _ => OnPlayerInteraction(false);
-                    else if (x.name.Equals("Use"))
-                        x.performed += _ => OnPlayerInteraction(true);
+        private string GetButtonDescription(InputAction action) {
+            bool isController = StartOfRound.Instance.localPlayerUsingController;
+            bool isPS = isController && (Gamepad.current is DualShockGamepad || Gamepad.current is DualShock3GamepadHID || Gamepad.current is DualShock4GamepadHID);
+            InputBinding? binding = null;
+            foreach (InputBinding x in action.bindings) {
+                if (isController && x.effectivePath.StartsWith("<Gamepad>")) {
+                    binding = x;
+                    break;
+                } else if (!isController && (x.effectivePath.StartsWith("<Keyboard>") || x.effectivePath.StartsWith("<Mouse>"))) {
+                    binding = x;
+                    break;
                 }
-            } else {
-                Plugin.LOGGER.LogWarning("Unable to activate monitor touchscreen. Reason: Failed to get local player.");
             }
+
+            string path = binding != null ? binding.Value.effectivePath : "";
+            string[] splits = path.Split("/");
+            return (splits.Length > 1 ? path : "") switch
+            {
+                // Mouse
+                "<Mouse>/leftButton" => "LΜB",  // Uses 'Greek Capital Letter Mu' for M
+                "<Mouse>/rightButton" => "RΜB", // Uses 'Greek Capital Letter Mu' for M
+                // Keyboard
+                "<Keyboard>/escape" => "ESC",
+                // Controller
+                // Right buttons
+                "<Gamepad>/buttonNorth" => isPS ? "△" : "Y",
+                "<Gamepad>/buttonEast" => isPS ? "◯" : "B",
+                "<Gamepad>/buttonSouth" => isPS ? "X" : "A",
+                "<Gamepad>/buttonWest" => isPS ? "□" : "X",
+                // Sticks
+                "<Gamepad>/leftStickPress" => "L-Stick",
+                "<Gamepad>/rightStickPress" => "R-Stick",
+                // Shoulder, Trigger buttons
+                "<Gamepad>/leftShoulder" => isPS ? "L1" : "L-Shoulder",
+                "<Gamepad>/leftTrigger" => isPS ? "L2" : "L-Trigger",
+                "<Gamepad>/rightShoulder" => isPS ? "R1" : "R-Shoulder",
+                "<Gamepad>/rightTrigger" => isPS ? "R2" : "R-Trigger",
+                _ => splits.Length > 1 ? splits[1].ToUpper() : "?"
+            };
+        }
+
+        private void OnEnable() {
+            PlayerControllerB ply = LOCAL_PLAYER;
+            if (ply == null) {
+                Plugin.LOGGER.LogWarning("Unable to activate monitor touchscreen. Reason: Failed to get local player.");
+                return;
+            } else if (_primary != null || _secondary != null)
+                return;
+
+            // Create new InputActions
+            _primary = new InputAction(
+                name:"Touchscreen:Primary",
+                type:InputActionType.Button,
+                binding: Plugin.CONFIG_PRIMARY.Value
+            );
+            _primary.performed += _ => OnPlayerInteraction(false);
+            _primary.Enable();
+            _secondary = new InputAction(
+                name: "Touchscreen:Secondary",
+                type: InputActionType.Button,
+                binding: Plugin.CONFIG_SECONDARY.Value
+            );
+            _secondary.performed += _ => OnPlayerInteraction(true);
+            _secondary.Enable();
+
+            // Log actions to console
+            Plugin.LOGGER.LogInfo("Set primary button to: " + GetButtonDescription(_primary));
+            Plugin.LOGGER.LogInfo("Set secondary button to: " + GetButtonDescription(_secondary));
         }
 
         private void Update() {
@@ -99,25 +156,14 @@ namespace touchscreen {
                     _lookingAtMonitor = true;
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
                     ply.cursorIcon.enabled = true;
-                    ply.cursorIcon.sprite = Plugin.hoverIcon;
-                    if (!StartOfRound.Instance.localPlayerUsingController) {
-                        ply.cursorTip.text = """
-                        [E] Interact
-                        [LΜB] Flash (Radar)
-                        """; // Used 'Greek Capital Letter Mu' for M as otherwise "[LMB]" will be replaced with "[E]"
-                    } else {
-                        if (Gamepad.current is DualShockGamepad) {
-                            ply.cursorTip.text = """
-                            [□] Interact
-                            [R2] Flash (Radar)
-                            """;
-                        } else {
-                            ply.cursorTip.text = """
-                            [X] Interact
-                            [R-Trigger] Flash (Radar)
-                            """;
-                        }
-                    }
+                    ply.cursorIcon.sprite = Plugin.HOVER_ICON;
+                    ply.cursorTip.text = String.Format("""
+                        [{0}] Interact
+                        [{1}] Flash (Radar)
+                        """,
+                        GetButtonDescription(_primary),
+                        GetButtonDescription(_secondary)
+                    );
                 }
             } else if (ply != null && _lookingAtMonitor) {
                 ply.isGrabbingObjectAnimation = false;
