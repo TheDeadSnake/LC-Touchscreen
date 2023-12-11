@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using GameNetcodeStuff;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.DualShock;
+using UnityEngine.InputSystem.XInput;
 
 namespace touchscreen {
 
@@ -99,10 +102,24 @@ namespace touchscreen {
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
                     ply.cursorIcon.enabled = true;
                     ply.cursorIcon.sprite = Plugin.hoverIcon;
-                    ply.cursorTip.text = """
+                    if (!StartOfRound.Instance.localPlayerUsingController) {
+                        ply.cursorTip.text = """
                         [E] Interact
                         [LΜB] Flash (Radar)
                         """; // Used 'Greek Capital Letter Mu' for M as otherwise "[LMB]" will be replaced with "[E]"
+                    } else {
+                        if (Gamepad.current is DualShockGamepad) {
+                            ply.cursorTip.text = """
+                            [□] Interact
+                            [R2] Flash (Radar)
+                            """;
+                        } else {
+                            ply.cursorTip.text = """
+                            [X] Interact
+                            [R-Trigger] Flash (Radar)
+                            """;
+                        }
+                    }
                 }
             } else if (ply != null && _lookingAtMonitor) {
                 ply.isGrabbingObjectAnimation = false;
