@@ -27,7 +27,7 @@ public class Plugin : BaseUnityPlugin
         SceneManager.sceneLoaded += OnSceneLoaded;
 
         // Load hover icon
-        string path = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen", "HoverIcon.png");
+        string path = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen", "HoverIcon.png"); // Only .png and .jpg are supported
         if (File.Exists(path)) {
             UnityWebRequest req = UnityWebRequestTexture.GetTexture(Utility.ConvertToWWWFormat(path));
             req.SendWebRequest().completed += _ => {
