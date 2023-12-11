@@ -14,7 +14,7 @@ public class Plugin : BaseUnityPlugin
     internal static ManualLogSource LOGGER;
     internal static Sprite hoverIcon;
 
-    public void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
         if (scene.name.StartsWith("level", System.StringComparison.OrdinalIgnoreCase)) {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {

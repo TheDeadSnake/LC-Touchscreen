@@ -25,7 +25,7 @@ namespace touchscreen {
             );
         }
 
-        public bool IsLookingAtMonitor(out Bounds bound, out Ray viewRay, out Ray camRay) {
+        private bool IsLookingAtMonitor(out Bounds bound, out Ray viewRay, out Ray camRay) {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply is not null && ply.isInHangarShipRoom) {
                 Ray lookRay = new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
@@ -43,7 +43,7 @@ namespace touchscreen {
             return false;
         }
 
-        public Vector3 GetMonitorCoordinates(Bounds bounds, Vector3 point) {
+        private Vector3 GetMonitorCoordinates(Bounds bounds, Vector3 point) {
             return new Vector3(
                 1f - 1f / Math.Abs(bounds.max.z - bounds.min.z) * (point.z - bounds.min.z),
                 1f / Math.Abs(bounds.max.y - bounds.min.y) * (point.y - bounds.min.y),
@@ -77,7 +77,7 @@ namespace touchscreen {
             }
         }
 
-        public void OnEnable()
+        private void OnEnable()
         {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply != null) {
