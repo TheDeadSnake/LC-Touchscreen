@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace touchscreen;
 
-[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.0.3")]
+[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.0.4")]
 [BepInProcess("Lethal Company.exe")]
 public class Plugin : BaseUnityPlugin
 {
