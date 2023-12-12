@@ -14,6 +14,8 @@ namespace touchscreen {
         private bool _lookingAtMonitor = false;
         private InputAction _primary;
         private InputAction _secondary;
+        private Action<InputAction.CallbackContext> _primaryAction;
+        private Action<InputAction.CallbackContext> _secondaryAction;
 
         private Bounds GetBounds() {
             // Magic values are the offset from the monitor object center
@@ -130,23 +132,28 @@ namespace touchscreen {
 
             // Create new InputActions
             _primary = new InputAction(
-                name:"Touchscreen:Primary",
-                type:InputActionType.Button,
+                name: "Touchscreen:Primary",
+                type: InputActionType.Button,
                 binding: Plugin.CONFIG_PRIMARY.Value
             );
-            _primary.performed += _ => OnPlayerInteraction(false);
+            _primary.performed += (_primaryAction = (_ => OnPlayerInteraction(false)));
             _primary.Enable();
             _secondary = new InputAction(
                 name: "Touchscreen:Secondary",
                 type: InputActionType.Button,
                 binding: Plugin.CONFIG_SECONDARY.Value
             );
-            _secondary.performed += _ => OnPlayerInteraction(true);
+            _secondary.performed += (_secondaryAction = (_ => OnPlayerInteraction(true)));
             _secondary.Enable();
 
             // Log actions to console
             Plugin.LOGGER.LogInfo("Set primary button to: " + GetButtonDescription(_primary));
             Plugin.LOGGER.LogInfo("Set secondary button to: " + GetButtonDescription(_secondary));
+        }
+
+        private void OnDisable() {
+            _primary.performed -= _primaryAction;
+            _secondary.performed -= _secondaryAction;
         }
 
         private void Update() {
