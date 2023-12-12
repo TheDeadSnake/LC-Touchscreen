@@ -19,12 +19,12 @@ public class Plugin : BaseUnityPlugin
     public static Sprite HOVER_ICON { get; private set; }
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
-    private static ConfigEntry<bool> _config_ignore_override { get; set; }
+    private static bool _config_ignore_override = false;
 
     private static bool _override = true;
     private static bool _onPlanet = false;
     public static bool IsActive {
-        get => _onPlanet && (_override || _config_ignore_override.Value);
+        get => _onPlanet && (_override || _config_ignore_override);
         set {
             if (_override != value) {
                 _override = value;
@@ -46,7 +46,11 @@ public class Plugin : BaseUnityPlugin
                 obj.AddComponent<ScreenScript>();
             }
             _onPlanet = true;
-        } else
+        }
+    }
+
+    private void OnSceneUnloaded(Scene scene) {
+        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase))
             _onPlanet = false;
     }
 
@@ -54,6 +58,7 @@ public class Plugin : BaseUnityPlugin
         Plugin.LOGGER = this.Logger;
         string pluginFolder = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen");
         SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
 
         // Load config values
         Plugin.CONFIG_PRIMARY = this.Config.Bind(
@@ -81,10 +86,10 @@ public class Plugin : BaseUnityPlugin
             false,
             """
             Set if other plugins can disable / enable the Touchscreen feature.
-             > true: Other plugins can no longer toggle it
-             > false: Other plugins may disable / enable it
+             > "true": Other plugins can no longer toggle it
+             > "false": Other plugins may disable / enable it
             """
-        );
+        ).Value;
         ConfigEntry<string> imagePath = this.Config.Bind(
             "UI", "PointerIcon",
             "HoverIcon.png",
