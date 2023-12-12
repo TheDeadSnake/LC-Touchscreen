@@ -4,11 +4,8 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.Networking;
-using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace touchscreen;
 
