@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
@@ -18,13 +19,32 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
 
+    private static bool _override = true;
+    private static bool _onPlanet = false;
+    public static bool IsActive {
+        get => _onPlanet && _override;
+        set {
+            if (_override != value) {
+                _override = value;
+                StackFrame prevFrame = (new StackTrace()).GetFrame(1);
+                Plugin.LOGGER.LogInfo(String.Format("Touchscreen was {0} by {1}.{2}",
+                    value ? "enabled" : "disabled",
+                    prevFrame.GetFileName(),
+                    prevFrame.GetMethod().Name
+                ));
+            }
+        }
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        if (scene.name.StartsWith("level", System.StringComparison.OrdinalIgnoreCase)) {
+        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase)) {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {
                 obj.AddComponent<ScreenScript>();
             }
-        }
+            _onPlanet = true;
+        } else
+            _onPlanet = false;
     }
 
     private void Awake() {

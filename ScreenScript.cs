@@ -55,7 +55,7 @@ namespace touchscreen {
 
         private void OnPlayerInteraction(bool isAlt) {
             PlayerControllerB ply = LOCAL_PLAYER;
-            if (ply != null && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
+            if (ply != null && Plugin.IsActive && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
                 foreach (Collider x in Physics.OverlapCapsule(camRay.GetPoint(0), camRay.GetPoint(10), _isCloseMax)) {
                     if (!isAlt && x.GetComponent<TerminalAccessibleObject>() is TerminalAccessibleObject tObject) { // Clicked on BigDoor, Land mine, Turret
                         tObject.CallFunctionFromTerminal();
@@ -151,7 +151,7 @@ namespace touchscreen {
 
         private void Update() {
             PlayerControllerB ply = LOCAL_PLAYER;
-            if (IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
+            if (Plugin.IsActive && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
                 if (!_lookingAtMonitor) {
                     _lookingAtMonitor = true;
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
