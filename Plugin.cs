@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -26,11 +27,12 @@ public class Plugin : BaseUnityPlugin
         set {
             if (_override != value) {
                 _override = value;
-                StackFrame prevFrame = (new StackTrace()).GetFrame(1);
-                Plugin.LOGGER.LogInfo(String.Format("Touchscreen was {0} by {1}.{2}",
+                MethodBase prevFrame = (new StackTrace()).GetFrame(1).GetMethod();
+                Plugin.LOGGER.LogInfo(String.Format("Touchscreen was {0} by {1}.{2}.{3}",
                     value ? "enabled" : "disabled",
-                    prevFrame.GetFileName(),
-                    prevFrame.GetMethod().Name
+                    prevFrame.ReflectedType.Namespace,
+                    prevFrame.ReflectedType.Name,
+                    prevFrame.Name
                 ));
             }
         }
