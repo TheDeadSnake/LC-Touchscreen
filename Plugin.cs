@@ -4,8 +4,11 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Networking;
+using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace touchscreen;
 
@@ -57,15 +60,28 @@ public class Plugin : BaseUnityPlugin
             "UI", "PointerIcon",
             "HoverIcon.png",
             String.Format("""
+            Accepts a file name relative to the plugin name or a full system path
             You can either choose one of the three default icons "HoverIcon.png", "CrossIcon.png", "DotIcon.png" or
             create your own (Only .png and .jpg are supported) and place it in: {0}
+            Examples: "HoverIcon.png" or "X:\Images\SomeImage.png"
             """, pluginFolder)
         );
 
+        // Try to resolve imagePath to full path
+        string iconPath;
+        if (imagePath.Value.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || imagePath.Value.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)) {
+            // Check if provided imagePath is relative file name or full path
+            iconPath = (Path.GetFileName(imagePath.Value) == imagePath.Value) ?
+                Path.Combine(pluginFolder, imagePath.Value) :
+                imagePath.Value;
+        } else {
+            LOGGER.LogWarning("The provided icon file extension is not supported. Please make sure it's either a .png or .jpg file. Trying to use default icon...");
+            iconPath = Path.Combine(pluginFolder, imagePath.DefaultValue.ToString());
+        }
+
         // Load hover icon
-        string path = Path.Combine(pluginFolder, imagePath.Value); // Only .png and .jpg are supported
-        if (File.Exists(path) && (path.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))) {
-            UnityWebRequest req = UnityWebRequestTexture.GetTexture(Utility.ConvertToWWWFormat(path));
+        if (File.Exists(iconPath)) {
+            UnityWebRequest req = UnityWebRequestTexture.GetTexture(Utility.ConvertToWWWFormat(iconPath));
             req.SendWebRequest().completed += _ => {
                 Texture2D tex = DownloadHandlerTexture.GetContent(req);
                 Plugin.HOVER_ICON = Sprite.Create(
@@ -76,7 +92,10 @@ public class Plugin : BaseUnityPlugin
                 );
             };
         } else
-            LOGGER.LogWarning(" > Unable to locate hover icon at path: " + path);
+            LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
+
+        // Register Terminal node
+        //HUDManager.Instance.terminalScript.terminalNodes.allKeywords.
         LOGGER.LogInfo("Enabled TouchScreen");
     }
 
