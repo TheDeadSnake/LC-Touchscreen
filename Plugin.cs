@@ -19,11 +19,12 @@ public class Plugin : BaseUnityPlugin
     public static Sprite HOVER_ICON { get; private set; }
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
+    private static ConfigEntry<bool> _config_ignore_override { get; set; }
 
     private static bool _override = true;
     private static bool _onPlanet = false;
     public static bool IsActive {
-        get => _onPlanet && _override;
+        get => _onPlanet && (_override || _config_ignore_override.Value);
         set {
             if (_override != value) {
                 _override = value;
@@ -73,6 +74,15 @@ public class Plugin : BaseUnityPlugin
             Allowed value format: "<Keyboard>/KEY", "<Mouse>/BUTTON", "<Gamepad>/BUTTON"
             Examples: "<Keyboard>/g" "<Mouse>/rightButton" "<Gamepad>/buttonWest"
             For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+            """
+        );
+        _config_ignore_override = this.Config.Bind(
+            "Features", "IgnoreOverride",
+            false,
+            """
+            Set if other plugins can disable / enable the Touchscreen feature.
+             > true: Other plugins can no longer toggle it
+             > false: Other plugins may disable / enable it
             """
         );
         ConfigEntry<string> imagePath = this.Config.Bind(
