@@ -89,7 +89,7 @@ namespace touchscreen {
             if (ply?.isInHangarShipRoom == true) {
                 Vector3 vec = this.gameObject.transform.position - ply.transform.position;
                 float distance = Math.Abs(vec.x) + Math.Abs(vec.y) + Math.Abs(vec.z);
-                if (distance < ply.grabDistance) {
+                if (distance < 6.85f) {
                     MAP_RENDERER.SwitchRadarTargetForward(true);
                 }
             }
@@ -191,17 +191,19 @@ namespace touchscreen {
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
                     ply.cursorIcon.enabled = true;
                     ply.cursorIcon.sprite = Plugin.HOVER_ICON;
-                    ply.cursorTip.text = String.Format("""
-                        [{0}] Interact
-                        [{1}] Flash (Radar)
-                        {2}
-                        """,
-                        GetButtonDescription(_primary),
-                        GetButtonDescription(_secondary),
-                        String.IsNullOrWhiteSpace(Plugin.CONFIG_QUICK_SWITCH.Value) ?
-                            "" :
-                            "[" + GetButtonDescription(_quickSwitch) + "] Switch target"
-                    );
+                    if (Plugin.CONFIG_SHOW_TOOLTIP.Value) {
+                        ply.cursorTip.text = String.Format("""
+                            [{0}] Interact
+                            [{1}] Flash (Radar)
+                            {2}
+                            """,
+                            GetButtonDescription(_primary),
+                            GetButtonDescription(_secondary),
+                            String.IsNullOrWhiteSpace(Plugin.CONFIG_QUICK_SWITCH.Value) ?
+                                "" :
+                                "[" + GetButtonDescription(_quickSwitch) + "] Switch target"
+                        );
+                    }
                 }
             } else if (ply != null && _lookingAtMonitor) {
                 ply.isGrabbingObjectAnimation = false;

@@ -20,6 +20,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
     public static ConfigEntry<string> CONFIG_QUICK_SWITCH { get; private set; }
+    public static ConfigEntry<bool> CONFIG_SHOW_TOOLTIP { get; private set; }
     private static bool _config_ignore_override = false;
 
     private static bool _override = true;
@@ -112,6 +113,13 @@ public class Plugin : BaseUnityPlugin
             You can either choose one of the three default icons "HoverIcon.png", "CrossIcon.png", "DotIcon.png" or
             create your own (Only .png and .jpg are supported) and place it in: {0}
             Examples: "HoverIcon.png" or "X:\Images\SomeImage.png"
+            """, pluginFolder)
+        );
+        Plugin.CONFIG_SHOW_TOOLTIP = this.Config.Bind(
+            "UI", "ShowTooltip",
+            true,
+            String.Format("""
+            Enable / Disable the keybind tooltip when hovering over the monitor
             """, pluginFolder)
         );
 
