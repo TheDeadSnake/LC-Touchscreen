@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using BepInEx;
 using GameNetcodeStuff;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,8 +15,10 @@ namespace touchscreen {
         private bool _lookingAtMonitor = false;
         private InputAction _primary;
         private InputAction _secondary;
+        private InputAction _quickSwitch;
         private Action<InputAction.CallbackContext> _primaryAction;
         private Action<InputAction.CallbackContext> _secondaryAction;
+        private Action<InputAction.CallbackContext> _quickSwitchAction;
 
         private Bounds GetBounds() {
             // Magic values are the offset from the monitor object center
@@ -81,6 +84,17 @@ namespace touchscreen {
             }
         }
 
+        private void OnPlayerQuickSwitch() {
+            PlayerControllerB ply = LOCAL_PLAYER;
+            if (ply?.isInHangarShipRoom == true) {
+                Vector3 vec = this.gameObject.transform.position - ply.transform.position;
+                float distance = Math.Abs(vec.x) + Math.Abs(vec.y) + Math.Abs(vec.z);
+                if (distance < ply.grabDistance) {
+                    MAP_RENDERER.SwitchRadarTargetForward(true);
+                }
+            }
+        }
+
         private string GetButtonDescription(InputAction action) {
             bool isController = StartOfRound.Instance.localPlayerUsingController;
             bool isPS = isController && (Gamepad.current is DualShockGamepad || Gamepad.current is DualShock3GamepadHID || Gamepad.current is DualShock4GamepadHID);
@@ -97,8 +111,7 @@ namespace touchscreen {
 
             string path = binding != null ? binding.Value.effectivePath : "";
             string[] splits = path.Split("/");
-            return (splits.Length > 1 ? path : "") switch
-            {
+            return (splits.Length > 1 ? path : "") switch {
                 // Mouse
                 "<Mouse>/leftButton" => "LΜB",  // Uses 'Greek Capital Letter Mu' for M
                 "<Mouse>/rightButton" => "RΜB", // Uses 'Greek Capital Letter Mu' for M
@@ -122,6 +135,17 @@ namespace touchscreen {
             };
         }
 
+        private InputAction CreateKeybind(string key, string binding, Action<InputAction.CallbackContext> action) {
+            InputAction inputAction = new InputAction(
+                name: key,
+                type: InputActionType.Button,
+                binding: binding
+            );
+            inputAction.performed += action;
+            inputAction.Enable();
+            return inputAction;
+        }
+
         private void OnEnable() {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply == null) {
@@ -131,29 +155,32 @@ namespace touchscreen {
                 return;
 
             // Create new InputActions
-            _primary = new InputAction(
-                name: "Touchscreen:Primary",
-                type: InputActionType.Button,
-                binding: Plugin.CONFIG_PRIMARY.Value
+            _primary = CreateKeybind(
+                "Touchscreen:Primary",
+                Plugin.CONFIG_PRIMARY.Value,
+                _primaryAction = (_ => OnPlayerInteraction(false))
             );
-            _primary.performed += (_primaryAction = (_ => OnPlayerInteraction(false)));
-            _primary.Enable();
-            _secondary = new InputAction(
-                name: "Touchscreen:Secondary",
-                type: InputActionType.Button,
-                binding: Plugin.CONFIG_SECONDARY.Value
+            _secondary = CreateKeybind(
+                "Touchscreen:Secondary",
+                Plugin.CONFIG_SECONDARY.Value,
+                _secondaryAction = (_ => OnPlayerInteraction(true))
             );
-            _secondary.performed += (_secondaryAction = (_ => OnPlayerInteraction(true)));
-            _secondary.Enable();
+            _quickSwitch = CreateKeybind(
+                "Touchscreen:QuickSwitch",
+                Plugin.CONFIG_QUICK_SWITCH.Value,
+                _quickSwitchAction = (_ => OnPlayerQuickSwitch())
+            );
 
             // Log actions to console
             Plugin.LOGGER.LogInfo("Set primary button to: " + GetButtonDescription(_primary));
             Plugin.LOGGER.LogInfo("Set secondary button to: " + GetButtonDescription(_secondary));
+            Plugin.LOGGER.LogInfo("Set quick switch button to: " + GetButtonDescription(_quickSwitch));
         }
 
         private void OnDisable() {
             _primary.performed -= _primaryAction;
             _secondary.performed -= _secondaryAction;
+            _quickSwitch.performed -= _quickSwitchAction;
         }
 
         private void Update() {
@@ -167,9 +194,13 @@ namespace touchscreen {
                     ply.cursorTip.text = String.Format("""
                         [{0}] Interact
                         [{1}] Flash (Radar)
+                        {2}
                         """,
                         GetButtonDescription(_primary),
-                        GetButtonDescription(_secondary)
+                        GetButtonDescription(_secondary),
+                        String.IsNullOrWhiteSpace(Plugin.CONFIG_QUICK_SWITCH.Value) ?
+                            "" :
+                            "[" + GetButtonDescription(_quickSwitch) + "] Switch target"
                     );
                 }
             } else if (ply != null && _lookingAtMonitor) {

@@ -19,6 +19,7 @@ public class Plugin : BaseUnityPlugin
     public static Sprite HOVER_ICON { get; private set; }
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
+    public static ConfigEntry<string> CONFIG_QUICK_SWITCH { get; private set; }
     private static bool _config_ignore_override = false;
 
     private static bool _override = true;
@@ -61,6 +62,7 @@ public class Plugin : BaseUnityPlugin
         SceneManager.sceneUnloaded += OnSceneUnloaded;
 
         // Load config values
+            // Keybinds
         Plugin.CONFIG_PRIMARY = this.Config.Bind(
             "Layout", "Primary",
             "<Keyboard>/e",
@@ -81,6 +83,18 @@ public class Plugin : BaseUnityPlugin
             For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
             """
         );
+        Plugin.CONFIG_QUICK_SWITCH = this.Config.Bind(
+            "Layout", "Switch",
+            "",
+            """
+                    Name of the key mapping for the quick switch action
+                    Allowed value format: "<Keyboard>/KEY", "<Mouse>/BUTTON", "<Gamepad>/BUTTON"
+                    Examples: "<Keyboard>/g" "<Mouse>/rightButton" "<Gamepad>/buttonWest"
+                    For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+                    """
+        );
+
+            // Image
         _config_ignore_override = this.Config.Bind(
             "Features", "IgnoreOverride",
             false,
