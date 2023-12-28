@@ -82,7 +82,7 @@ namespace touchscreen {
                         TriggerRadar(rItem, isAlt);
                         return;
                     } else if (x.GetComponent<PlayerControllerB>() is PlayerControllerB tgtPlayer) { // Clicked on player or radar the player is holding
-                        if (!TriggerRadar(tgtPlayer.currentlyHeldObjectServer.GetComponent<RadarBoosterItem>(), isAlt) && !isAlt) {
+                        if (!TriggerRadar(tgtPlayer.currentlyHeldObjectServer?.GetComponent<RadarBoosterItem>(), isAlt) && !isAlt) {
                             List<TransformAndName> list = MAP_RENDERER.radarTargets;
                             for (int i = 0; i < list.Count; i++) {
                                 if (tgtPlayer.transform.Equals(list[i].transform)) {
