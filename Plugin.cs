@@ -98,8 +98,9 @@ public class Plugin : BaseUnityPlugin
         );
         Plugin.CONFIG_ALT_REVERSE = this.Config.Bind(
             "Layout", "ReverseSwitch",
-            false,
+            true,
             """
+            Decides what the "SwitchAlternative" does when pressed
             true: When the alternative key is pressed, the quick switch will go through the reverse order
             false: When the alternative key is pressed the previous radar target will be selected
             """
