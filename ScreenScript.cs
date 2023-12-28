@@ -60,6 +60,17 @@ namespace touchscreen {
             );
         }
 
+        private bool TriggerRadar(RadarBoosterItem rItem, bool isAlt) {
+            if (rItem != null) {
+                if (isAlt)
+                    rItem.FlashAndSync();
+                else
+                    rItem.PlayPingAudioAndSync();
+                return true;
+            } else
+                return false;
+        }
+
         private void OnPlayerInteraction(bool isAlt) {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply != null && Plugin.IsActive && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
@@ -68,17 +79,16 @@ namespace touchscreen {
                         tObject.CallFunctionFromTerminal();
                         return;
                     } else if (x.GetComponent<RadarBoosterItem>() is RadarBoosterItem rItem) { // Clicked on Radar booster
-                        if (isAlt)
-                            rItem.FlashAndSync(); // New Radar boost function (v45+)
-                        else
-                            rItem.PlayPingAudioAndSync();
+                        TriggerRadar(rItem, isAlt);
                         return;
-                    } else if (!isAlt && x.GetComponent<PlayerControllerB>() is PlayerControllerB tgtPlayer) { // Clicked on player
-                        List<TransformAndName> list = MAP_RENDERER.radarTargets;
-                        for (int i = 0; i < list.Count; i++) {
-                            if (tgtPlayer.transform.Equals(list[i].transform)) {
-                                MAP_RENDERER.SwitchRadarTargetAndSync(i);
-                                return;
+                    } else if (x.GetComponent<PlayerControllerB>() is PlayerControllerB tgtPlayer) { // Clicked on player or radar the player is holding
+                        if (!TriggerRadar(tgtPlayer.currentlyHeldObjectServer.GetComponent<RadarBoosterItem>(), isAlt) && !isAlt) {
+                            List<TransformAndName> list = MAP_RENDERER.radarTargets;
+                            for (int i = 0; i < list.Count; i++) {
+                                if (tgtPlayer.transform.Equals(list[i].transform)) {
+                                    MAP_RENDERER.SwitchRadarTargetAndSync(i);
+                                    return;
+                                }
                             }
                         }
                     }
