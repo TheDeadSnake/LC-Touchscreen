@@ -16,9 +16,11 @@ namespace touchscreen {
         private InputAction _primary;
         private InputAction _secondary;
         private InputAction _quickSwitch;
+        private InputAction _altQuickSwitch;
         private Action<InputAction.CallbackContext> _primaryAction;
         private Action<InputAction.CallbackContext> _secondaryAction;
         private Action<InputAction.CallbackContext> _quickSwitchAction;
+        private Action<InputAction.CallbackContext> _altQuickSwitchAction;
 
         private Bounds GetBounds() {
             // Magic values are the offset from the monitor object center
@@ -84,13 +86,19 @@ namespace touchscreen {
             }
         }
 
-        private void OnPlayerQuickSwitch() {
+        private void OnPlayerQuickSwitch(bool isAlt) {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply?.isInHangarShipRoom == true) {
                 Vector3 vec = this.gameObject.transform.position - ply.transform.position;
                 float distance = Math.Abs(vec.x) + Math.Abs(vec.y) + Math.Abs(vec.z);
                 if (distance < 6.85f) {
-                    MAP_RENDERER.SwitchRadarTargetForward(true);
+                    if (!isAlt) {
+                        if (Plugin.CONFIG_ALT_REVERSE.Value && _altQuickSwitch.IsPressed())
+                            MAP_RENDERER.SwitchRadarTargetBackwards(true);
+                        else
+                            MAP_RENDERER.SwitchRadarTargetForward(true);
+                    } else if (!Plugin.CONFIG_ALT_REVERSE.Value)
+                        MAP_RENDERER.SwitchRadarTargetBackwards(true);
                 }
             }
         }
@@ -168,13 +176,19 @@ namespace touchscreen {
             _quickSwitch = CreateKeybind(
                 "Touchscreen:QuickSwitch",
                 Plugin.CONFIG_QUICK_SWITCH.Value,
-                _quickSwitchAction = (_ => OnPlayerQuickSwitch())
+                _quickSwitchAction = (_ => OnPlayerQuickSwitch(false))
+            );
+            _altQuickSwitch = CreateKeybind(
+                "Touchscreen:AltQuickSwitch",
+                Plugin.CONFIG_ALT_QUICK_SWITCH.Value,
+                _altQuickSwitchAction = (_ => OnPlayerQuickSwitch(true))
             );
 
             // Log actions to console
             Plugin.LOGGER.LogInfo("Set primary button to: " + GetButtonDescription(_primary));
             Plugin.LOGGER.LogInfo("Set secondary button to: " + GetButtonDescription(_secondary));
             Plugin.LOGGER.LogInfo("Set quick switch button to: " + GetButtonDescription(_quickSwitch));
+            Plugin.LOGGER.LogInfo("Set alt quick switch button to: " + GetButtonDescription(_altQuickSwitch));
         }
 
         private void OnDisable() {

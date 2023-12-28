@@ -20,6 +20,8 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
     public static ConfigEntry<string> CONFIG_QUICK_SWITCH { get; private set; }
+    public static ConfigEntry<string> CONFIG_ALT_QUICK_SWITCH { get; private set; }
+    public static ConfigEntry<bool> CONFIG_ALT_REVERSE { get; private set; }
     public static ConfigEntry<bool> CONFIG_SHOW_TOOLTIP { get; private set; }
     private static bool _config_ignore_override = false;
 
@@ -88,14 +90,33 @@ public class Plugin : BaseUnityPlugin
             "Layout", "Switch",
             "",
             """
-                    Name of the key mapping for the quick switch action
-                    Allowed value format: "<Keyboard>/KEY", "<Mouse>/BUTTON", "<Gamepad>/BUTTON"
-                    Examples: "<Keyboard>/g" "<Mouse>/rightButton" "<Gamepad>/buttonWest"
-                    For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
-                    """
+            Name of the key mapping for the quick switch action
+            Allowed value format: "<Keyboard>/KEY", "<Mouse>/BUTTON", "<Gamepad>/BUTTON"
+            Examples: "<Keyboard>/g" "<Mouse>/rightButton" "<Gamepad>/buttonWest"
+            For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+            """
+        );
+        Plugin.CONFIG_ALT_REVERSE = this.Config.Bind(
+            "Layout", "ReverseSwitch",
+            false,
+            """
+            true: When the alternative key is pressed, the quick switch will go through the reverse order
+            false: When the alternative key is pressed the previous radar target will be selected
+            """
+        );
+        Plugin.CONFIG_ALT_QUICK_SWITCH = this.Config.Bind(
+            "Layout", "SwitchAlternative",
+            "",
+            """
+            Name of the key mapping for the alternative quick switch action
+            The behaviour of the key is dependent on the "ReverseSwitch" option
+            Allowed value format: "<Keyboard>/KEY", "<Mouse>/BUTTON", "<Gamepad>/BUTTON"
+            Examples: "<Keyboard>/g" "<Mouse>/rightButton" "<Gamepad>/buttonWest"
+            For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+            """
         );
 
-            // Image
+        // Image
         _config_ignore_override = this.Config.Bind(
             "Features", "IgnoreOverride",
             false,
