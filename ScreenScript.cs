@@ -205,6 +205,7 @@ namespace touchscreen {
             _primary.performed -= _primaryAction;
             _secondary.performed -= _secondaryAction;
             _quickSwitch.performed -= _quickSwitchAction;
+            _altQuickSwitch.performed -= _altQuickSwitchAction;
         }
 
         private void Update() {
