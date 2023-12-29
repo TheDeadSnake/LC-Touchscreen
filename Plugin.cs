@@ -54,7 +54,7 @@ public class Plugin : BaseUnityPlugin
     }
 
     private void OnSceneUnloaded(Scene scene) {
-        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase))
+        if (_onPlanet)
             _onPlanet = false;
     }
 
