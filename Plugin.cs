@@ -43,8 +43,15 @@ public class Plugin : BaseUnityPlugin
         }
     }
 
+    internal bool IsNonPlanet(string sceneName)
+    {
+        return sceneName.Equals("samplescenerelay", StringComparison.OrdinalIgnoreCase) ||
+            sceneName.Contains("init", StringComparison.OrdinalIgnoreCase) ||
+            sceneName.Equals("mainmenu", StringComparison.OrdinalIgnoreCase);
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase)) {
+        if (!IsNonPlanet(scene.name)) {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {
                 obj.AddComponent<ScreenScript>();
@@ -54,7 +61,7 @@ public class Plugin : BaseUnityPlugin
     }
 
     private void OnSceneUnloaded(Scene scene) {
-        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase))
+        if (_onPlanet)
             _onPlanet = false;
     }
 
