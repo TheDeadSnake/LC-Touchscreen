@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace touchscreen;
 
 [BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.0.8")]
 [BepInProcess("Lethal Company.exe")]
+[BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource LOGGER;
@@ -42,9 +44,12 @@ public class Plugin : BaseUnityPlugin
             }
         }
     }
+    internal delegate R Supplier<R, T>(T value);
+    private static Supplier<bool, string> _onPlanetCheck = _ => false;
+
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase)) {
+        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase) || _onPlanetCheck.Invoke(scene.name)) {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {
                 obj.AddComponent<ScreenScript>();
@@ -172,8 +177,12 @@ public class Plugin : BaseUnityPlugin
         } else
             LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
 
-        // Register Terminal node
-        //HUDManager.Instance.terminalScript.terminalNodes.allKeywords.
+        // Lethal Expansion support
+        if (Chainloader.PluginInfos.TryGetValue("LethalExpansion", out PluginInfo info)) {
+            _onPlanetCheck = x => x.Equals("InitSceneLaunchOptions") && LethalExpansion.LethalExpansion.isInGame;
+            LOGGER.LogInfo($" > Hooked into LethalExpansion {info.Metadata.Version}");
+        }
+
         LOGGER.LogInfo("Enabled TouchScreen");
     }
 
