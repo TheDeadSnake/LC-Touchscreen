@@ -15,7 +15,7 @@ namespace touchscreen;
 [BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.0.10")]
 [BepInProcess("Lethal Company.exe")]
 [BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("LethalExpansion(core)", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("com.github.lethalmods.lethalexpansioncore", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource LOGGER;
