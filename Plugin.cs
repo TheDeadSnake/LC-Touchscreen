@@ -16,9 +16,11 @@ namespace touchscreen;
 [BepInProcess("Lethal Company.exe")]
 [BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.github.lethalmods.lethalexpansioncore", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource LOGGER;
+    internal delegate R Supplier<R, T>(T value);
     public static Sprite HOVER_ICON { get; private set; }
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
@@ -46,7 +48,6 @@ public class Plugin : BaseUnityPlugin
             }
         }
     }
-    internal delegate R Supplier<R, T>(T value);
     private static Supplier<bool, string> _onPlanetCheck = _ => false;
 
 
