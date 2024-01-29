@@ -187,7 +187,7 @@ public class Plugin : BaseUnityPlugin
             LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
 
         // Lethal Expansion support
-        if (Chainloader.PluginInfos.TryGetValue("com.github.lethalmods.lethalexpansioncore", out PluginInfo lec)) {
+        if (Chainloader.PluginInfos.TryGetValue("com.github.lethalmods.lethalexpansioncore", out PluginInfo lec) && !LethalExpansionCore.LethalExpansion.Settings.UseOriginalLethalExpansion.Value) {
             _onPlanetCheck = x => x.Equals("InitSceneLaunchOptions") && LethalExpansionCore.LethalExpansion.isInGame;
             LOGGER.LogInfo($" > Hooked into LethalExpansionCore {lec.Metadata.Version}");
         } else if (Chainloader.PluginInfos.TryGetValue("LethalExpansion", out PluginInfo le)) {
