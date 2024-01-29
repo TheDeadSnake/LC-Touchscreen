@@ -24,6 +24,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<string> CONFIG_QUICK_SWITCH { get; private set; }
     public static ConfigEntry<string> CONFIG_ALT_QUICK_SWITCH { get; private set; }
     public static ConfigEntry<bool> CONFIG_ALT_REVERSE { get; private set; }
+    public static ConfigEntry<bool> CONFIG_SHOW_POINTER { get; private set; }
     public static ConfigEntry<bool> CONFIG_SHOW_TOOLTIP { get; private set; }
     private static bool _config_ignore_override = false;
 
@@ -140,6 +141,13 @@ public class Plugin : BaseUnityPlugin
             You can either choose one of the three default icons "HoverIcon.png", "CrossIcon.png", "DotIcon.png" or
             create your own (Only .png and .jpg are supported) and place it in: {0}
             Examples: "HoverIcon.png" or "X:\Images\SomeImage.png"
+            """, pluginFolder)
+        );
+        Plugin.CONFIG_SHOW_POINTER = this.Config.Bind(
+            "UI", "ShowPointer",
+            true,
+            String.Format("""
+            Enable / Disable the pointer when hovering over the monitor
             """, pluginFolder)
         );
         Plugin.CONFIG_SHOW_TOOLTIP = this.Config.Bind(

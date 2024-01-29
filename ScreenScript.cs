@@ -161,6 +161,8 @@ namespace touchscreen {
             );
             inputAction.performed += action;
             inputAction.Enable();
+
+            Plugin.LOGGER.LogInfo($"Set ${key} button to: ${GetButtonDescription(inputAction)}");
             return inputAction;
         }
 
@@ -193,12 +195,6 @@ namespace touchscreen {
                 Plugin.CONFIG_ALT_QUICK_SWITCH.Value,
                 _altQuickSwitchAction = (_ => OnPlayerQuickSwitch(true))
             );
-
-            // Log actions to console
-            Plugin.LOGGER.LogInfo("Set primary button to: " + GetButtonDescription(_primary));
-            Plugin.LOGGER.LogInfo("Set secondary button to: " + GetButtonDescription(_secondary));
-            Plugin.LOGGER.LogInfo("Set quick switch button to: " + GetButtonDescription(_quickSwitch));
-            Plugin.LOGGER.LogInfo("Set alt quick switch button to: " + GetButtonDescription(_altQuickSwitch));
         }
 
         private void OnDisable() {
@@ -214,9 +210,11 @@ namespace touchscreen {
                 if (!_lookingAtMonitor) {
                     _lookingAtMonitor = true;
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
-                    ply.cursorIcon.enabled = true;
-                    ply.cursorIcon.sprite = Plugin.HOVER_ICON;
-                    if (Plugin.CONFIG_SHOW_TOOLTIP.Value) {
+                    if (Plugin.CONFIG_SHOW_POINTER.Value) { // Display Pointer
+                        ply.cursorIcon.enabled = true;
+                        ply.cursorIcon.sprite = Plugin.HOVER_ICON;
+                    }
+                    if (Plugin.CONFIG_SHOW_TOOLTIP.Value) { // Display Tooltips
                         ply.cursorTip.text = String.Format("""
                             [{0}] Interact
                             [{1}] Flash (Radar)
