@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BepInEx;
+using BepInEx.Bootstrap;
 using GameNetcodeStuff;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -23,15 +24,7 @@ namespace touchscreen {
         private Action<InputAction.CallbackContext> _altQuickSwitchAction;
 
         private Bounds GetBounds() {
-            // Magic values are the offset from the monitor object center
-            return new Bounds(
-                new Vector3(
-                    this.gameObject.transform.position.x + .06f,
-                    this.gameObject.transform.position.y + -.05f,
-                    this.gameObject.transform.position.z + .84f
-                ),
-                new Vector3(0, 1.05f, 1.36f)
-            );
+            return Plugin.CREATE_BOUNDS.Invoke(this.gameObject);
         }
 
         private bool IsLookingAtMonitor(out Bounds bound, out Ray viewRay, out Ray camRay) {
@@ -39,6 +32,7 @@ namespace touchscreen {
             if (ply is not null && ply.isInHangarShipRoom) {
                 Ray lookRay = new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
                 Bounds bounds = GetBounds();
+
                 if (bounds.IntersectRay(lookRay, out float distance) && distance <= ply.grabDistance) {
                     bound = bounds;
                     viewRay = lookRay;

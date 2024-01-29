@@ -17,10 +17,10 @@ namespace touchscreen;
 [BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.github.lethalmods.lethalexpansioncore", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
-public class Plugin : BaseUnityPlugin
-{
+public class Plugin : BaseUnityPlugin {
     internal static ManualLogSource LOGGER;
-    internal delegate R Supplier<R, T>(T value);
+    internal delegate R Func<R, T>(T value);
+    internal delegate R Supplier<R>();
     public static Sprite HOVER_ICON { get; private set; }
     public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
     public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
@@ -31,6 +31,7 @@ public class Plugin : BaseUnityPlugin
     public static ConfigEntry<bool> CONFIG_SHOW_TOOLTIP { get; private set; }
     private static bool _config_ignore_override = false;
 
+    internal static Func<Bounds, GameObject> CREATE_BOUNDS;
     private static bool _override = true;
     private static bool _onPlanet = false;
     public static bool IsActive {
@@ -48,8 +49,7 @@ public class Plugin : BaseUnityPlugin
             }
         }
     }
-    private static Supplier<bool, string> _onPlanetCheck = _ => false;
-
+    private static Func<bool, string> _onPlanetCheck = _ => false;
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
         if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase) || _onPlanetCheck.Invoke(scene.name)) {
@@ -188,7 +188,8 @@ public class Plugin : BaseUnityPlugin
             LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
 
         // Lethal Expansion support
-        if (Chainloader.PluginInfos.TryGetValue("com.github.lethalmods.lethalexpansioncore", out PluginInfo lec) && !LethalExpansionCore.LethalExpansion.Settings.UseOriginalLethalExpansion.Value) {
+        Supplier<bool> _lec = () => !LethalExpansionCore.LethalExpansion.Settings.UseOriginalLethalExpansion.Value;
+        if (Chainloader.PluginInfos.TryGetValue("com.github.lethalmods.lethalexpansioncore", out PluginInfo lec) && _lec.Invoke()) {
             _onPlanetCheck = x => x.Equals("InitSceneLaunchOptions") && LethalExpansionCore.LethalExpansion.isInGame;
             LOGGER.LogInfo($" > Hooked into LethalExpansionCore {lec.Metadata.Version}");
         } else if (Chainloader.PluginInfos.TryGetValue("LethalExpansion", out PluginInfo le)) {
@@ -196,6 +197,29 @@ public class Plugin : BaseUnityPlugin
             LOGGER.LogInfo($" > Hooked into LethalExpansion {le.Metadata.Version}");
         }
 
+        // GeneralImprovements support
+        Supplier<bool> _gi = () => GeneralImprovements.Plugin.UseBetterMonitors.Value;
+        if (Chainloader.PluginInfos.TryGetValue("ShaosilGaming.GeneralImprovements", out PluginInfo gi) && _gi.Invoke()) {
+            CREATE_BOUNDS = x => new Bounds(
+                new Vector3(
+                    x.transform.position.x + -.2f,
+                    x.transform.position.y + -.05f,
+                    x.transform.position.z + .03f
+                ),
+                new Vector3(0, 1.05f, 1.36f)
+            );
+            Plugin.LOGGER.LogInfo($" > Hooked into GeneralImprovements {gi.Metadata.Version}");
+        } else {
+            CREATE_BOUNDS = x => new Bounds(
+                new Vector3(
+                    x.transform.position.x + .06f,
+                    x.transform.position.y + -.05f,
+                    x.transform.position.z + .84f
+                ),
+                new Vector3(0, 1.05f, 1.36f)
+            );
+        }
+        
         LOGGER.LogInfo("Enabled TouchScreen");
     }
 
