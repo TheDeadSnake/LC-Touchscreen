@@ -15,6 +15,7 @@ namespace touchscreen;
 [BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.0.9")]
 [BepInProcess("Lethal Company.exe")]
 [BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("LethalExpansion(core)", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource LOGGER;
@@ -186,9 +187,12 @@ public class Plugin : BaseUnityPlugin
             LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
 
         // Lethal Expansion support
-        if (Chainloader.PluginInfos.TryGetValue("LethalExpansion", out PluginInfo info)) {
+        if (Chainloader.PluginInfos.TryGetValue("com.github.lethalmods.lethalexpansioncore", out PluginInfo lec)) {
+            _onPlanetCheck = x => x.Equals("InitSceneLaunchOptions") && LethalExpansionCore.LethalExpansion.isInGame;
+            LOGGER.LogInfo($" > Hooked into LethalExpansionCore {lec.Metadata.Version}");
+        } else if (Chainloader.PluginInfos.TryGetValue("LethalExpansion", out PluginInfo le)) {
             _onPlanetCheck = x => x.Equals("InitSceneLaunchOptions") && LethalExpansion.LethalExpansion.isInGame;
-            LOGGER.LogInfo($" > Hooked into LethalExpansion {info.Metadata.Version}");
+            LOGGER.LogInfo($" > Hooked into LethalExpansion {le.Metadata.Version}");
         }
 
         LOGGER.LogInfo("Enabled TouchScreen");
