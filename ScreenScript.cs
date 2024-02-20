@@ -97,11 +97,11 @@ namespace touchscreen {
                 float distance = Math.Abs(vec.x) + Math.Abs(vec.y) + Math.Abs(vec.z);
                 if (distance < 6.85f) {
                     if (!isAlt) {
-                        if (Plugin.CONFIG_ALT_REVERSE.Value && _altQuickSwitch.IsPressed())
+                        if (ConfigUtil.CONFIG_ALT_REVERSE.Value && _altQuickSwitch.IsPressed())
                             MAP_RENDERER.SwitchRadarTargetBackwards(true);
                         else
                             MAP_RENDERER.SwitchRadarTargetForward(true);
-                    } else if (!Plugin.CONFIG_ALT_REVERSE.Value)
+                    } else if (!ConfigUtil.CONFIG_ALT_REVERSE.Value)
                         MAP_RENDERER.SwitchRadarTargetBackwards(true);
                 }
             }
@@ -171,22 +171,22 @@ namespace touchscreen {
             // Create new InputActions
             _primary = CreateKeybind(
                 "Touchscreen:Primary",
-                Plugin.CONFIG_PRIMARY.Value,
+                ConfigUtil.CONFIG_PRIMARY.Value,
                 _primaryAction = (_ => OnPlayerInteraction(false))
             );
             _secondary = CreateKeybind(
                 "Touchscreen:Secondary",
-                Plugin.CONFIG_SECONDARY.Value,
+                ConfigUtil.CONFIG_SECONDARY.Value,
                 _secondaryAction = (_ => OnPlayerInteraction(true))
             );
             _quickSwitch = CreateKeybind(
                 "Touchscreen:QuickSwitch",
-                Plugin.CONFIG_QUICK_SWITCH.Value,
+                ConfigUtil.CONFIG_QUICK_SWITCH.Value,
                 _quickSwitchAction = (_ => OnPlayerQuickSwitch(false))
             );
             _altQuickSwitch = CreateKeybind(
                 "Touchscreen:AltQuickSwitch",
-                Plugin.CONFIG_ALT_QUICK_SWITCH.Value,
+                ConfigUtil.CONFIG_ALT_QUICK_SWITCH.Value,
                 _altQuickSwitchAction = (_ => OnPlayerQuickSwitch(true))
             );
         }
@@ -204,11 +204,11 @@ namespace touchscreen {
                 if (!_lookingAtMonitor) {
                     _lookingAtMonitor = true;
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
-                    if (Plugin.CONFIG_SHOW_POINTER.Value) { // Display Pointer
+                    if (ConfigUtil.CONFIG_SHOW_POINTER.Value) { // Display Pointer
                         ply.cursorIcon.enabled = true;
-                        ply.cursorIcon.sprite = Plugin.HOVER_ICON;
+                        ply.cursorIcon.sprite = ConfigUtil.HOVER_ICON;
                     }
-                    if (Plugin.CONFIG_SHOW_TOOLTIP.Value) { // Display Tooltips
+                    if (ConfigUtil.CONFIG_SHOW_TOOLTIP.Value) { // Display Tooltips
                         ply.cursorTip.text = String.Format("""
                             [{0}] Interact
                             [{1}] Flash (Radar)
@@ -216,7 +216,7 @@ namespace touchscreen {
                             """,
                             GetButtonDescription(_primary),
                             GetButtonDescription(_secondary),
-                            String.IsNullOrWhiteSpace(Plugin.CONFIG_QUICK_SWITCH.Value) ?
+                            String.IsNullOrWhiteSpace(ConfigUtil.CONFIG_QUICK_SWITCH.Value) ?
                                 "" :
                                 "[" + GetButtonDescription(_quickSwitch) + "] Switch target"
                         );
