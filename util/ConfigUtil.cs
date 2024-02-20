@@ -1,14 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using BepInEx;
-using BepInEx.Bootstrap;
 using BepInEx.Configuration;
-using BepInEx.Logging;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.SceneManagement;
 
 namespace touchscreen;
 
