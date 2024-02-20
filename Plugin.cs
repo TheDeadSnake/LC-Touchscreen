@@ -52,7 +52,7 @@ public class Plugin : BaseUnityPlugin {
     private static Func<bool, string> _onPlanetCheck = _ => false;
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        if (scene.name.StartsWith("level", StringComparison.OrdinalIgnoreCase) || scene.name.Equals("companybuilding", StringComparison.OrdinalIgnoreCase) || _onPlanetCheck.Invoke(scene.name)) {
+        if (PlanetUtil.IsPlanet(scene)) {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {
                 obj.AddComponent<ScreenScript>();
@@ -187,15 +187,8 @@ public class Plugin : BaseUnityPlugin {
         } else
             LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
 
-        // Lethal Expansion support
-        Supplier<bool> _lec = () => !LethalExpansionCore.LethalExpansion.Settings.UseOriginalLethalExpansion.Value;
-        if (Chainloader.PluginInfos.TryGetValue("com.github.lethalmods.lethalexpansioncore", out PluginInfo lec) && _lec.Invoke()) {
-            _onPlanetCheck = x => x.Equals("InitSceneLaunchOptions") && LethalExpansionCore.LethalExpansion.isInGame;
-            LOGGER.LogInfo($" > Hooked into LethalExpansionCore {lec.Metadata.Version}");
-        } else if (Chainloader.PluginInfos.TryGetValue("LethalExpansion", out PluginInfo le)) {
-            _onPlanetCheck = x => x.Equals("InitSceneLaunchOptions") && LethalExpansion.LethalExpansion.isInGame;
-            LOGGER.LogInfo($" > Hooked into LethalExpansion {le.Metadata.Version}");
-        }
+        // Lethal Expansion / Lethal Expansion (core) support
+        PlanetUtil.checkPlugins();
 
         // GeneralImprovements support
         Supplier<bool> _gi = () => GeneralImprovements.Plugin.UseBetterMonitors.Value;
