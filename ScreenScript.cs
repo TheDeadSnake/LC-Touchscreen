@@ -12,8 +12,6 @@ namespace touchscreen {
         private const float _isCloseMax = 1.25f;
         private bool _lookingAtMonitor = false;
 
-        public InputAction primaryButton = InputUtil.INPUT_PRIMARY;
-
         private Bounds GetBounds() {
             return Plugin.CREATE_BOUNDS.Invoke(this.gameObject);
         }
