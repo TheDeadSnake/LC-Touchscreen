@@ -10,7 +10,17 @@ namespace touchscreen {
         private static PlayerControllerB LOCAL_PLAYER => GameNetworkManager.Instance?.localPlayerController;
         private static ManualCameraRenderer MAP_RENDERER => StartOfRound.Instance?.mapScreen;
         private const float _isCloseMax = 1.25f;
-        private bool _lookingAtMonitor = false;
+        private LineRenderer _vrRay = null;
+        private bool _vlookingAtMonitor = false;
+        private bool _lookingAtMonitor {
+            get => _vlookingAtMonitor;
+            set {
+                if (_vrRay is not null) {
+                    _vrRay.enabled = value;
+                }
+                _vlookingAtMonitor = value;
+            }
+        }
 
         private Bounds GetBounds() {
             return Plugin.CREATE_BOUNDS.Invoke(this.gameObject);
@@ -102,8 +112,17 @@ namespace touchscreen {
             if (ply == null) {
                 Plugin.LOGGER.LogWarning("Unable to activate monitor touchscreen. Reason: Failed to get local player.");
                 return;
-            } else if (InputUtil.INPUT_SECONDARY != null || InputUtil.INPUT_SECONDARY != null)
-                return;
+            }
+
+            // VR Ray
+            if (InputUtil.inVR && ConfigUtil.CONFIG_VR_SHOW_RAY.Value) {
+                _vrRay = this.gameObject.AddComponent<LineRenderer>();
+                _vrRay.positionCount = 2;
+                _vrRay.SetPositions(new[] {Vector3.zero, Vector3.zero});
+                _vrRay.widthMultiplier = 0.0075f;
+                _vrRay.alignment = LineAlignment.View;
+                _vrRay.enabled = false;
+            }
         }
 
         private void OnDisable() {
@@ -113,6 +132,7 @@ namespace touchscreen {
         private void Update() {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (Plugin.IsActive && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
+                _vrRay?.SetPositions(new[] {lookRay.origin, lookRay.GetPoint(ply.grabDistance)});
                 if (!_lookingAtMonitor) {
                     _lookingAtMonitor = true;
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again

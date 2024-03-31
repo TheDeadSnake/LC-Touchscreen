@@ -13,6 +13,7 @@ public static class ConfigUtil {
     public static ConfigEntry<bool> CONFIG_ALT_REVERSE { get; private set; }
     public static ConfigEntry<bool> CONFIG_SHOW_POINTER { get; private set; }
     public static ConfigEntry<bool> CONFIG_SHOW_TOOLTIP { get; private set; }
+    public static ConfigEntry<bool> CONFIG_VR_SHOW_RAY { get; private set; }
     private static bool _config_ignore_override = false;
     public static bool IGNORE_OVERRIDE {
         get => _config_ignore_override;
@@ -157,11 +158,20 @@ public static class ConfigUtil {
             Enable / Disable the pointer when hovering over the monitor
             """, pluginFolder)
         );
+
+        // Other
         ConfigUtil.CONFIG_SHOW_TOOLTIP = config.Bind(
             "UI", "ShowTooltip",
             true,
             String.Format("""
             Enable / Disable the keybind tooltip when hovering over the monitor
+            """, pluginFolder)
+        );
+        ConfigUtil.CONFIG_VR_SHOW_RAY = config.Bind(
+            "UI", "VRShowRay",
+            true,
+            String.Format("""
+            Enable / Disable the VR Ray when hovering over the Monitor
             """, pluginFolder)
         );
 
