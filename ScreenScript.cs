@@ -19,9 +19,8 @@ namespace touchscreen {
         private bool IsLookingAtMonitor(out Bounds bound, out Ray viewRay, out Ray camRay) {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply is not null && ply.isInHangarShipRoom) {
-                Ray lookRay = new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
+                Ray lookRay = InputUtil.LOOK_RAY.Invoke(ply);
                 Bounds bounds = GetBounds();
-
                 if (bounds.IntersectRay(lookRay, out float distance) && distance <= ply.grabDistance) {
                     bound = bounds;
                     viewRay = lookRay;

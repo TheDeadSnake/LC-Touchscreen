@@ -1,8 +1,10 @@
 using System;
 using BepInEx;
 using BepInEx.Bootstrap;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
+using GameNetcodeStuff;
 
 namespace touchscreen;
 
@@ -35,6 +37,10 @@ public static class InputUtil {
     private static Execute _quickSwitchExecute = () => {};
     private static Execute _altQuickSwitchExecute = () => {};
 
+    // LethalCompanyVR - support
+    public static bool inVR { get; private set; }
+    internal static Plugin.Func<Ray, PlayerControllerB> LOOK_RAY;
+
     /*
         Helper functions    
     */
@@ -44,7 +50,10 @@ public static class InputUtil {
         bool isPS = isController && (Gamepad.current is DualShockGamepad || Gamepad.current is DualShock3GamepadHID || Gamepad.current is DualShock4GamepadHID);
         InputBinding? binding = null;
         foreach (InputBinding x in action.bindings) {
-            if (isController && x.effectivePath.StartsWith("<Gamepad>")) {
+            if (InputUtil.inVR && (x.effectivePath.StartsWith("<XRController>"))) {
+                binding = x;
+                break;
+            } else if (isController && x.effectivePath.StartsWith("<Gamepad>")) {
                 binding = x;
                 break;
             } else if (!isController && (x.effectivePath.StartsWith("<Keyboard>") || x.effectivePath.StartsWith("<Mouse>"))) {
@@ -110,10 +119,30 @@ public static class InputUtil {
     /*
         Setup    
     */
+
     internal static void Setup() {
+        // LethalCompanyVR support
+        Plugin.Supplier<bool> _vr = () => LCVR.Player.VRSession.InVR;
+        if (Chainloader.PluginInfos.TryGetValue("io.daxcess.lcvr", out PluginInfo vr) && _vr.Invoke()) {
+            LOOK_RAY = ply => {
+                Transform t = LCVR.Player.VRSession.Instance.LocalPlayer?.PrimaryController.InteractOrigin;
+                if (t) {
+                    return new Ray(t.position, t.forward);
+                }
+                Plugin.LOGGER.LogWarning(" > Failed to get primary VRController.");
+                return new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
+            };
+            InputUtil.inVR = true;
+            Plugin.LOGGER.LogInfo($" > Hooked into LethalCompanyVR {vr.Metadata.Version}");
+        } else {
+            LOOK_RAY = ply => new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
+            InputUtil.inVR = false;
+        }
+
         // Create keybinds
         Plugin.Supplier<bool> _iu_create = () => TouchScreenInputClass.Instance != null;
-        if (Chainloader.PluginInfos.TryGetValue("com.rune580.LethalCompanyInputUtils", out PluginInfo iu) && _iu_create.Invoke()) {
+        // Note: Remove VR check once InputUtil supports VR controller
+        if (!InputUtil.inVR && Chainloader.PluginInfos.TryGetValue("com.rune580.LethalCompanyInputUtils", out PluginInfo iu) && _iu_create.Invoke()) {
             INPUT_PRIMARY.performed += _ => InputUtil._primaryExecute();
             INPUT_SECONDARY.performed += _ => InputUtil._secondaryExecute();
             INPUT_QUICKSWITCH.performed += _ => InputUtil._quickSwitchExecute();
@@ -122,27 +151,25 @@ public static class InputUtil {
         } else {
             INPUT_PRIMARY = InputUtil.CreateKeybind(
                 "Touchscreen:Primary",
-                ConfigUtil.CONFIG_PRIMARY.Value,
+                InputUtil.inVR ? ConfigUtil.CONFIG_VR_PRIMARY.Value : ConfigUtil.CONFIG_PRIMARY.Value,
                 _ => InputUtil._primaryExecute()
             );
             INPUT_SECONDARY = InputUtil.CreateKeybind(
                 "Touchscreen:Secondary",
-                ConfigUtil.CONFIG_SECONDARY.Value,
+                InputUtil.inVR ? ConfigUtil.CONFIG_VR_SECONDARY.Value : ConfigUtil.CONFIG_SECONDARY.Value,
                 _ => InputUtil._secondaryExecute()
             );
             INPUT_QUICKSWITCH = InputUtil.CreateKeybind(
                 "Touchscreen:QuickSwitch",
-                ConfigUtil.CONFIG_QUICK_SWITCH.Value,
+                InputUtil.inVR ? ConfigUtil.CONFIG_VR_QUICK_SWITCH.Value : ConfigUtil.CONFIG_QUICK_SWITCH.Value,
                 _ => InputUtil._quickSwitchExecute()
             );
             INPUT_ALT_QUICKSWITCH = InputUtil.CreateKeybind(
                 "Touchscreen:AltQuickSwitch",
-                ConfigUtil.CONFIG_ALT_QUICK_SWITCH.Value,
+                InputUtil.inVR ? ConfigUtil.CONFIG_VR_ALT_QUICK_SWITCH.Value : ConfigUtil.CONFIG_ALT_QUICK_SWITCH.Value,
                 _ => InputUtil._altQuickSwitchExecute()
             );
         }
-
-
     }
 
 }

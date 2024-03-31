@@ -8,11 +8,8 @@ using UnityEngine.Networking;
 namespace touchscreen;
 
 public static class ConfigUtil {
+    // General
     public static Sprite HOVER_ICON { get; private set; }
-    public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
-    public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
-    public static ConfigEntry<string> CONFIG_QUICK_SWITCH { get; private set; }
-    public static ConfigEntry<string> CONFIG_ALT_QUICK_SWITCH { get; private set; }
     public static ConfigEntry<bool> CONFIG_ALT_REVERSE { get; private set; }
     public static ConfigEntry<bool> CONFIG_SHOW_POINTER { get; private set; }
     public static ConfigEntry<bool> CONFIG_SHOW_TOOLTIP { get; private set; }
@@ -21,8 +18,33 @@ public static class ConfigUtil {
         get => _config_ignore_override;
     }
 
+
+    // Keybinds
+    public static ConfigEntry<string> CONFIG_PRIMARY { get; private set; }
+    public static ConfigEntry<string> CONFIG_SECONDARY { get; private set; }
+    public static ConfigEntry<string> CONFIG_QUICK_SWITCH { get; private set; }
+    public static ConfigEntry<string> CONFIG_ALT_QUICK_SWITCH { get; private set; }
+
+    // VR keybinds
+    // Note: Above entries could be used for VR as well hover for simplity sake I created extra VR entries
+    // (So it works with VR when installed)
+    public static ConfigEntry<string> CONFIG_VR_PRIMARY { get; private set; }
+    public static ConfigEntry<string> CONFIG_VR_SECONDARY { get; private set; }
+    public static ConfigEntry<string> CONFIG_VR_QUICK_SWITCH { get; private set; }
+    public static ConfigEntry<string> CONFIG_VR_ALT_QUICK_SWITCH { get; private set; }
+
     internal static void Setup(ConfigFile config, string pluginFolder) {
         // Keybinds
+        ConfigUtil.CONFIG_ALT_REVERSE = config.Bind(
+            "Layout", "ReverseSwitch",
+            true,
+            """
+            Decides what the "SwitchAlternative" does when pressed
+            true: When the alternative key is pressed, the quick switch will go through the reverse order
+            false: When the alternative key is pressed the previous radar target will be selected
+            """
+        );
+
         ConfigUtil.CONFIG_PRIMARY = config.Bind(
             "Layout", "Primary",
             "<Keyboard>/e",
@@ -53,15 +75,6 @@ public static class ConfigUtil {
             For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
             """
         );
-        ConfigUtil.CONFIG_ALT_REVERSE = config.Bind(
-            "Layout", "ReverseSwitch",
-            true,
-            """
-            Decides what the "SwitchAlternative" does when pressed
-            true: When the alternative key is pressed, the quick switch will go through the reverse order
-            false: When the alternative key is pressed the previous radar target will be selected
-            """
-        );
         ConfigUtil.CONFIG_ALT_QUICK_SWITCH = config.Bind(
             "Layout", "SwitchAlternative",
             "",
@@ -70,6 +83,49 @@ public static class ConfigUtil {
             The behaviour of the key is dependent on the "ReverseSwitch" option
             Allowed value format: "<Keyboard>/KEY", "<Mouse>/BUTTON", "<Gamepad>/BUTTON"
             Examples: "<Keyboard>/g" "<Mouse>/rightButton" "<Gamepad>/buttonWest"
+            For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+            """
+        );
+
+        // VR Keybinds
+        ConfigUtil.CONFIG_VR_PRIMARY = config.Bind(
+            "VR Layout", "Primary",
+            "<XRController>{RightHand}/triggerButton",
+            """
+            Name of the key mapping for the primary (switch, ping, trigger) actions
+            Allowed value format: "<XRController>{HAND}/BUTTON"
+            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton"
+            For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+            """
+        );
+        ConfigUtil.CONFIG_VR_SECONDARY = config.Bind(
+            "VR Layout", "Secondary",
+            "<XRController>{RightHand}/gripButton",
+            """
+            Name of the key mapping for the secondary (Flash) action
+            Allowed value format: "<XRController>{HAND}/BUTTON"
+            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton"
+            For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+            """
+        );
+        ConfigUtil.CONFIG_VR_QUICK_SWITCH = config.Bind(
+            "VR Layout", "Switch",
+            "",
+            """
+            Name of the key mapping for the quick switch action
+            Allowed value format: "<XRController>{HAND}/BUTTON"
+            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton"
+            For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
+            """
+        );
+        ConfigUtil.CONFIG_VR_ALT_QUICK_SWITCH = config.Bind(
+            "VR Layout", "SwitchAlternative",
+            "",
+            """
+            Name of the key mapping for the alternative quick switch action
+            The behaviour of the key is dependent on the "ReverseSwitch" option
+            Allowed value format: "<XRController>{HAND}/BUTTON"
+            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton"
             For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
             """
         );
