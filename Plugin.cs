@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 namespace touchscreen;
 
-[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.1.0")]
+[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.1.1")]
 [BepInProcess("Lethal Company.exe")]
 [BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.github.lethalmods.lethalexpansioncore", BepInDependency.DependencyFlags.SoftDependency)]
@@ -99,7 +99,6 @@ public class Plugin : BaseUnityPlugin {
                 new Vector3(0, 1.05f, 1.36f)
             );
         }
-
         LOGGER.LogInfo("Enabled TouchScreen");
     }
 
