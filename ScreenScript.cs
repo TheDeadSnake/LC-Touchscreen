@@ -117,11 +117,17 @@ namespace touchscreen {
             // VR Ray
             if (InputUtil.inVR && ConfigUtil.CONFIG_VR_SHOW_RAY.Value) {
                 _vrRay = this.gameObject.AddComponent<LineRenderer>();
+                _vrRay.enabled = false;
                 _vrRay.positionCount = 2;
                 _vrRay.SetPositions(new[] {Vector3.zero, Vector3.zero});
                 _vrRay.widthMultiplier = 0.0075f;
                 _vrRay.alignment = LineAlignment.View;
-                _vrRay.enabled = false;
+
+                // Get material from LCVR
+                LineRenderer lcvrLR = LCVRUtil.getVRControllerRay();
+                if (lcvrLR is not null) {
+                    _vrRay.material = lcvrLR.material;
+                }
             }
         }
 
@@ -129,18 +135,21 @@ namespace touchscreen {
             InputUtil.SCREEN_SCRIPT = null;
         }
 
-        private void Update() {
+        private void LateUpdate() { // Moved to LateUpdate from Update due to LCVR
             PlayerControllerB ply = LOCAL_PLAYER;
             if (Plugin.IsActive && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
                 _vrRay?.SetPositions(new[] {lookRay.origin, lookRay.GetPoint(ply.grabDistance)});
                 if (!_lookingAtMonitor) {
                     _lookingAtMonitor = true;
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
-                    if (ConfigUtil.CONFIG_SHOW_POINTER.Value) { // Display Pointer
+                    if (ConfigUtil.CONFIG_SHOW_POINTER.Value && !InputUtil.inVR) { // Display Pointer
                         ply.cursorIcon.enabled = true;
                         ply.cursorIcon.sprite = ConfigUtil.HOVER_ICON;
                     }
                     if (ConfigUtil.CONFIG_SHOW_TOOLTIP.Value) { // Display Tooltips
+                        if (InputUtil.inVR) {
+                            LCVRUtil.UpdateInteractCanvas(lookRay.GetPoint(ply.grabDistance / 2));
+                        }
                         ply.cursorTip.text = String.Format("""
                             [{0}] Interact
                             [{1}] Flash (Radar)

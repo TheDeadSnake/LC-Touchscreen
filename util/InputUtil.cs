@@ -38,8 +38,8 @@ public static class InputUtil {
     private static Execute _altQuickSwitchExecute = () => {};
 
     // LethalCompanyVR - support
-    public static bool inVR { get; private set; }
-    internal static Plugin.Func<Ray, PlayerControllerB> LOOK_RAY;
+    public static bool inVR { get; private set; } = false;
+    internal static Plugin.Func<Ray, PlayerControllerB> LOOK_RAY = ply => new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
 
     /*
         Helper functions    
@@ -122,21 +122,8 @@ public static class InputUtil {
 
     internal static void Setup() {
         // LethalCompanyVR support
-        Plugin.Supplier<bool> _vr = () => LCVR.Player.VRSession.InVR;
-        if (Chainloader.PluginInfos.TryGetValue("io.daxcess.lcvr", out PluginInfo vr) && _vr.Invoke()) {
-            LOOK_RAY = ply => {
-                Transform t = LCVR.Player.VRSession.Instance.LocalPlayer?.PrimaryController.InteractOrigin;
-                if (t) {
-                    return new Ray(t.position, t.forward);
-                }
-                Plugin.LOGGER.LogWarning(" > Failed to get primary VRController.");
-                return new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
-            };
-            InputUtil.inVR = true;
-            Plugin.LOGGER.LogInfo($" > Hooked into LethalCompanyVR {vr.Metadata.Version}");
-        } else {
-            LOOK_RAY = ply => new Ray(ply.gameplayCamera.transform.position, ply.gameplayCamera.transform.forward);
-            InputUtil.inVR = false;
+        if (Chainloader.PluginInfos.TryGetValue("io.daxcess.lcvr", out PluginInfo info)) {
+            InputUtil.inVR = LCVRUtil.Setup(info);
         }
 
         // Create keybinds
