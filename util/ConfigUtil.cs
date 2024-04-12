@@ -146,11 +146,11 @@ public static class ConfigUtil {
             "UI", "PointerIcon",
             "HoverIcon.png",
             String.Format("""
-            Accepts a file name relative to the plugin name or a full system path
-            You can either choose one of the three default icons "HoverIcon.png", "CrossIcon.png", "DotIcon.png" or
-            create your own (Only .png and .jpg are supported) and place it in: {0}
+            Accepts a file name relative to the plugin name, a full system path or you can
+            choose one of the three default icons "HoverIcon.png", "CrossIcon.png", "DotIcon.png".
+            If you create your own icon make sure it's either a .png or .jpg file.
             Examples: "HoverIcon.png" or "X:\Images\SomeImage.png"
-            """, pluginFolder)
+            """)
         );
         ConfigUtil.CONFIG_SHOW_POINTER = config.Bind(
             "UI", "ShowPointer",
