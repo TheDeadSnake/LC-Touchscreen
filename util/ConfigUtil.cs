@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using UnityEngine;
@@ -176,31 +177,58 @@ public static class ConfigUtil {
         );
 
         // Try to resolve imagePath to full path
-        string iconPath;
+        string iconPath = "";
         if (imagePath.Value.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || imagePath.Value.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)) {
             // Check if provided imagePath is relative file name or full path
             iconPath = (Path.GetFileName(imagePath.Value) == imagePath.Value) ?
                 Path.Combine(pluginFolder, imagePath.Value) :
                 imagePath.Value;
-        } else {
-            Plugin.LOGGER.LogWarning("The provided icon file extension is not supported. Please make sure it's either a .png or .jpg file. Trying to use default icon...");
+        } else if (!string.IsNullOrWhiteSpace(imagePath.ToString())) {
+            Plugin.LOGGER.LogWarning("The provided icon file extension is not supported. Please make sure it'stream either a .png or .jpg file. Fallback to default icon...");
+            imagePath.Value = imagePath.DefaultValue.ToString();
             iconPath = Path.Combine(pluginFolder, imagePath.DefaultValue.ToString());
         }
 
         // Load hover icon
-        if (File.Exists(iconPath)) {
+        if (!iconPath.Equals("") && File.Exists(iconPath)) {
             UnityWebRequest req = UnityWebRequestTexture.GetTexture(Utility.ConvertToWWWFormat(iconPath));
             req.SendWebRequest().completed += _ => {
+                // Get texture by local file url
                 Texture2D tex = DownloadHandlerTexture.GetContent(req);
+                // Create Sprite
                 ConfigUtil.HOVER_ICON = Sprite.Create(
                     tex,
                     new Rect(0f, 0f, tex.width, tex.height),
                     new Vector2(.5f, .5f),
                     100f
                 );
+                Plugin.LOGGER.LogInfo("Loaded icon: " + Path.GetFileName(iconPath));
             };
-        } else
-            Plugin.LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
+        } else {
+            // Try to load from Ressources
+            string strImagePath = imagePath.Value.ToString();
+            if (string.IsNullOrWhiteSpace(strImagePath) || strImagePath.Equals("HoverIcon.png") || strImagePath.Equals("CrossIcon.png") || strImagePath.Equals("DotIcon.png")) {
+                string resPath = String.Format("touchscreen.Resources.{0}",
+                    string.IsNullOrWhiteSpace(strImagePath) ? "HoverIcon.png" : strImagePath
+                );
+                Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resPath);
+                Texture2D tex = new Texture2D(0, 0); // LoadImage will replace the image size
+                using (MemoryStream ms = new MemoryStream()) { // Transform stream to byte[] and load using LoadImage
+                    stream.CopyTo(ms);
+                    ImageConversion.LoadImage(tex, ms.ToArray());
+                }
+                // Create Sprite
+                ConfigUtil.HOVER_ICON = Sprite.Create(
+                    tex,
+                    new Rect(0f, 0f, tex.width, tex.height),
+                    new Vector2(.5f, .5f),
+                    100f
+                );
+                Plugin.LOGGER.LogInfo("Loaded resource icon: " + resPath.Split(".")[2]);
+            } else {
+                Plugin.LOGGER.LogWarning(" > Unable to locate hover icon at provided path: " + iconPath);
+            }
+        }
     }
 
 
