@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 
 namespace touchscreen {
 
+    [DefaultExecutionOrder(100)] // Guarantees that this LateUpdate is executed after LCVR LateUpdate
     public class ScreenScript : MonoBehaviour {
         private static PlayerControllerB LOCAL_PLAYER => GameNetworkManager.Instance?.localPlayerController;
         private static ManualCameraRenderer MAP_RENDERER => StartOfRound.Instance?.mapScreen;
@@ -135,10 +136,27 @@ namespace touchscreen {
             InputUtil.SCREEN_SCRIPT = null;
         }
 
-        private void LateUpdate() { // Moved to LateUpdate from Update due to LCVR
+        private void LateUpdate() { // Moved from Update to LateUpdate due to LCVR
             PlayerControllerB ply = LOCAL_PLAYER;
             if (Plugin.IsActive && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
-                _vrRay?.SetPositions(new[] {lookRay.origin, lookRay.GetPoint(ply.grabDistance)});
+                if (InputUtil.inVR) {
+                    _vrRay?.SetPositions(new[] {lookRay.origin, lookRay.GetPoint(ply.grabDistance)});
+                    LCVRUtil.UpdateInteractCanvas(lookRay.GetPoint(ply.grabDistance / 2));
+                    if (ConfigUtil.CONFIG_SHOW_TOOLTIP.Value) { // Display Tooltips - Is overridden every update by LCVR https://github.com/DaXcess/LCVR/blob/eb568caab38abb1b9dbacb56eaa543059bcb05c3/Source/Player/VRController.cs#L319
+                        ply.cursorTip.text = String.Format("""
+                            [{0}] Interact
+                            [{1}] Flash (Radar)
+                            {2}
+                            """,
+                            InputUtil.GetButtonDescription(InputUtil.INPUT_PRIMARY),
+                            InputUtil.GetButtonDescription(InputUtil.INPUT_SECONDARY),
+                            String.IsNullOrWhiteSpace(ConfigUtil.CONFIG_QUICK_SWITCH.Value) ?
+                                "" :
+                                "[" + InputUtil.GetButtonDescription(InputUtil.INPUT_QUICKSWITCH) + "] Switch target"
+                        );
+                    }
+                }
+
                 if (!_lookingAtMonitor) {
                     _lookingAtMonitor = true;
                     ply.isGrabbingObjectAnimation = true; // Blocks the default code from overwriting it again
@@ -147,9 +165,6 @@ namespace touchscreen {
                         ply.cursorIcon.sprite = ConfigUtil.HOVER_ICON;
                     }
                     if (ConfigUtil.CONFIG_SHOW_TOOLTIP.Value) { // Display Tooltips
-                        if (InputUtil.inVR) {
-                            LCVRUtil.UpdateInteractCanvas(lookRay.GetPoint(ply.grabDistance / 2));
-                        }
                         ply.cursorTip.text = String.Format("""
                             [{0}] Interact
                             [{1}] Flash (Radar)
@@ -167,7 +182,6 @@ namespace touchscreen {
                 ply.isGrabbingObjectAnimation = false;
                 _lookingAtMonitor = false;
             }
-
         }
 
     }
