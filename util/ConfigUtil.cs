@@ -115,7 +115,7 @@ public static class ConfigUtil {
             """
             Name of the key mapping for the quick switch action
             Allowed value format: "<XRController>{HAND}/BUTTON"
-            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton"
+            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton" "<XRController>{LeftHand}/primaryButton"
             For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
             """
         );
@@ -126,7 +126,7 @@ public static class ConfigUtil {
             Name of the key mapping for the alternative quick switch action
             The behaviour of the key is dependent on the "ReverseSwitch" option
             Allowed value format: "<XRController>{HAND}/BUTTON"
-            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton"
+            Examples: "<XRController>{RightHand}/triggerButton" "<XRController>{RightHand}/gripButton" "<XRController>{LeftHand}/primaryButton"
             For in depth instructions see: https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/api/UnityEngine.InputSystem.InputControlPath.html
             """
         );
