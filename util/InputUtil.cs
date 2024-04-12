@@ -71,19 +71,28 @@ public static class InputUtil {
             // Keyboard
             "<Keyboard>/escape" => "ESC",
             // Controller
-            // Right buttons
+                // Right buttons
             "<Gamepad>/buttonNorth" => isPS ? "△" : "Y",
             "<Gamepad>/buttonEast" => isPS ? "◯" : "B",
             "<Gamepad>/buttonSouth" => isPS ? "X" : "A",
             "<Gamepad>/buttonWest" => isPS ? "□" : "X",
-            // Sticks
+                // Sticks
             "<Gamepad>/leftStickPress" => "L-Stick",
             "<Gamepad>/rightStickPress" => "R-Stick",
-            // Shoulder, Trigger buttons
+                // Shoulder, Trigger buttons
             "<Gamepad>/leftShoulder" => isPS ? "L1" : "L-Shoulder",
             "<Gamepad>/leftTrigger" => isPS ? "L2" : "L-Trigger",
             "<Gamepad>/rightShoulder" => isPS ? "R1" : "R-Shoulder",
             "<Gamepad>/rightTrigger" => isPS ? "R2" : "R-Trigger",
+            // VR
+            "<XRController>{RightHand}/triggerButton" => "R-Trigger",
+            "<XRController>{RightHand}/gripButton" => "R-Grip",
+            "<XRController>{LeftHand}/triggerButton" => "L-Trigger",
+            "<XRController>{LeftHand}/gripButton" => "L-Grip",
+            "<XRController>{RightHand}/primaryButton" => "R-PrimaryButton",
+            "<XRController>{LeftHand}/primaryButton" => "L-PrimaryButton",
+            "<XRController>{RightHand}/secondaryButton" => "R-SecondaryButton",
+            "<XRController>{LeftHand}/secondaryButton" => "L-SecondaryButton",
             _ => splits.Length > 1 ? splits[1].ToUpper() : "?"
         };
     }
