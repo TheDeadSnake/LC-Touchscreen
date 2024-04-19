@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GameNetcodeStuff;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
 namespace touchscreen {
 
@@ -70,6 +71,9 @@ namespace touchscreen {
                 foreach (Collider x in Physics.OverlapCapsule(camRay.GetPoint(0), camRay.GetPoint(10), _isCloseMax)) {
                     if (!isAlt && x.GetComponent<TerminalAccessibleObject>() is TerminalAccessibleObject tObject) { // Clicked on BigDoor, Land mine, Turret
                         tObject.CallFunctionFromTerminal();
+                        return;
+                    } else if (!isAlt && x.gameObject.GetComponentInParent<NetworkObject>() is NetworkObject oSpike && oSpike.name.StartsWith("SpikeRoofTrapHazard")) { // Clicked on Spike trap
+                        oSpike.GetComponentInChildren<TerminalAccessibleObject>()?.CallFunctionFromTerminal();
                         return;
                     } else if (x.GetComponent<RadarBoosterItem>() is RadarBoosterItem rItem) { // Clicked on Radar booster
                         TriggerRadar(rItem, isAlt);
