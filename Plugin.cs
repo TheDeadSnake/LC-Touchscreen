@@ -19,6 +19,7 @@ namespace touchscreen;
 [BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.rune580.LethalCompanyInputUtils", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("io.daxcess.lcvr", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("com.github.zehsteam.ToilHead", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin {
     internal static ManualLogSource LOGGER;
     internal delegate R Func<R, T>(T value);
@@ -100,6 +101,13 @@ public class Plugin : BaseUnityPlugin {
                 new Vector3(0, 1.05f, 1.36f)
             );
         }
+
+        // ToilHead support
+        if (Chainloader.PluginInfos.TryGetValue("com.github.zehsteam.ToilHead", out PluginInfo ti)) {
+            ToilHeadUtil.Setup();
+            Plugin.LOGGER.LogInfo($" > Hooked into ToilHead {ti.Metadata.Version}");
+        }
+
         LOGGER.LogInfo("Enabled TouchScreen");
     }
 

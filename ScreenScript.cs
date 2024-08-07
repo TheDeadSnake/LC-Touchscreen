@@ -88,6 +88,8 @@ namespace touchscreen {
                                 }
                             }
                         }
+                    } else if (!isAlt && ToilHeadUtil.IsEnabled && ToilHeadUtil.CallFollowTerminalAccessibleObject(x)) { // Clicked on ToilHead TerminalAccessibleObject
+                        return;
                     }
                 }
             }
