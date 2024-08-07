@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 namespace touchscreen;
 
-[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.1.2")]
+[BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.1.3")]
 [BepInProcess("Lethal Company.exe")]
 [BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.github.lethalmods.lethalexpansioncore", BepInDependency.DependencyFlags.SoftDependency)]
