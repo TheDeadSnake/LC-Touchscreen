@@ -14,8 +14,6 @@ namespace touchscreen;
 
 [BepInPlugin("me.pm.TheDeadSnake", "TouchScreen", "1.1.4")]
 [BepInProcess("Lethal Company.exe")]
-[BepInDependency("LethalExpansion", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("com.github.lethalmods.lethalexpansioncore", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("ShaosilGaming.GeneralImprovements", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.rune580.LethalCompanyInputUtils", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("io.daxcess.lcvr", BepInDependency.DependencyFlags.SoftDependency)]
@@ -75,9 +73,6 @@ public class Plugin : BaseUnityPlugin {
         // Load config values
         ConfigUtil.Setup(this.Config, pluginFolder);
         InputUtil.Setup();
-
-        // Lethal Expansion / Lethal Expansion (core) support
-        PlanetUtil.checkPlugins();
 
         // GeneralImprovements support
         Supplier<bool> _gi = () => GeneralImprovements.Plugin.UseBetterMonitors.Value;
