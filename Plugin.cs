@@ -4,10 +4,8 @@ using System.IO;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Bootstrap;
-using BepInEx.Configuration;
 using BepInEx.Logging;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 namespace touchscreen;
@@ -35,7 +33,7 @@ public class Plugin : BaseUnityPlugin {
             if (_override != value) {
                 _override = value;
                 MethodBase prevFrame = (new StackTrace()).GetFrame(1).GetMethod();
-                Plugin.LOGGER.LogInfo(String.Format("Touchscreen was {0} by {1}.{2}.{3}",
+                LOGGER.LogInfo(String.Format("Touchscreen was {0} by {1}.{2}.{3}",
                     value ? "enabled" : "disabled",
                     prevFrame.ReflectedType.Namespace,
                     prevFrame.ReflectedType.Name,
@@ -65,7 +63,7 @@ public class Plugin : BaseUnityPlugin {
 
     // Plugin Startup
     private void Awake() {
-        Plugin.LOGGER = this.Logger;
+        LOGGER = this.Logger;
         string pluginFolder = Path.Combine(Paths.PluginPath, "TheDeadSnake-Touchscreen");
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
@@ -85,7 +83,7 @@ public class Plugin : BaseUnityPlugin {
                 ),
                 new Vector3(0, 1.05f, 1.36f)
             );
-            Plugin.LOGGER.LogInfo($" > Hooked into GeneralImprovements {gi.Metadata.Version}");
+            LOGGER.LogInfo($" > Hooked into GeneralImprovements {gi.Metadata.Version}");
         } else {
             CREATE_BOUNDS = x => new Bounds(
                 new Vector3(
@@ -100,7 +98,7 @@ public class Plugin : BaseUnityPlugin {
         // ToilHead support
         if (Chainloader.PluginInfos.TryGetValue("com.github.zehsteam.ToilHead", out PluginInfo ti)) {
             ToilHeadUtil.Setup();
-            Plugin.LOGGER.LogInfo($" > Hooked into ToilHead {ti.Metadata.Version}");
+            LOGGER.LogInfo($" > Hooked into ToilHead {ti.Metadata.Version}");
         }
 
         LOGGER.LogInfo("Enabled TouchScreen");
