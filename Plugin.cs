@@ -67,14 +67,10 @@ public class Plugin : BaseUnityPlugin {
             _onPlanet = false;
     }
 
-    private void NOffset(ref Vector3 pos) {
-        pos.x += 1.5f;
-        pos.z += 0.05f;
-    }
+    private void NOffset(ref Vector3 pos) { }
 
     private void GIOffset(ref Vector3 pos) {
-        pos.x += 2.6f;
-        pos.z += 0f;
+        pos.x += 2.5f;
     }
     
     // Plugin Startup
