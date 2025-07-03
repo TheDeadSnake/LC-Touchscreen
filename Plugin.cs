@@ -16,6 +16,7 @@ namespace touchscreen;
 [BepInDependency("com.rune580.LethalCompanyInputUtils", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("io.daxcess.lcvr", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("com.github.zehsteam.ToilHead", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("ScienceBird.UniversalRadar", BepInDependency.DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin {
     internal static ManualLogSource LOGGER;
     internal delegate R Func<R, T>(T value);
@@ -52,11 +53,10 @@ public class Plugin : BaseUnityPlugin {
         if (PlanetUtil.IsPlanet(scene)) {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {
-                obj.AddComponent<ScreenScript>();
+                // Debug
+                // obj.AddComponent<ScreenScript>().dbg(false); 
                 
-                // DBG
-                // ScreenScript ssr = obj.AddComponent<ScreenScript>();
-                // ssr.dbg(false); 
+                obj.AddComponent<ScreenScript>();
             }
             _onPlanet = true;
         }
@@ -115,6 +115,13 @@ public class Plugin : BaseUnityPlugin {
             LOGGER.LogInfo($" > Hooked into ToilHead {ti.Metadata.Version}");
         }
 
+        // UniversalRadar support
+        if (Chainloader.PluginInfos.TryGetValue("ScienceBird.UniversalRadar", out PluginInfo ur)) {
+            // Map Camera is higher ==> Ray cast needs to be longer
+            ScreenScript.GROUND_DISTANCE = 30;
+            LOGGER.LogInfo($" > Hooked into UniversalRadar {ur.Metadata.Version}");
+        }
+        
         LOGGER.LogInfo("Enabled TouchScreen");
     }
 

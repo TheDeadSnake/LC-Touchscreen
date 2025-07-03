@@ -10,7 +10,8 @@ namespace touchscreen {
     public class ScreenScript : MonoBehaviour {
         private static PlayerControllerB LOCAL_PLAYER => GameNetworkManager.Instance?.localPlayerController;
         private static ManualCameraRenderer MAP_RENDERER => StartOfRound.Instance?.mapScreen;
-        private const float _isCloseMax = 1.25f;
+        internal static int GROUND_DISTANCE = 10;
+        private const float _isCloseMax = 1.5f;
         private LineRenderer _vrRay;
         private bool _vlookingAtMonitor;
         private bool _lookingAtMonitor {
@@ -73,9 +74,6 @@ namespace touchscreen {
 
             return Plugin.CREATE_BOUNDS.Invoke(gameObject);
         }
-
-        // public static float xOffset = 1.5f;
-        // public static float zOffset = 0.05f;
         
         private bool IsLookingAtMonitor(out Bounds bound, out Ray viewRay, out Ray camRay) {
             PlayerControllerB ply = LOCAL_PLAYER;
@@ -86,9 +84,6 @@ namespace touchscreen {
                     bound = bounds;
                     viewRay = lookRay;
                     camRay = MAP_RENDERER.cam.ViewportPointToRay(GetMonitorCoordinates(bounds, lookRay.GetPoint(distance)));
-                    Plugin.ORBITAL_OFFSET.Invoke(ref camRay.m_Origin);
-                    // camRay.m_Origin.x += xOffset;
-                    // camRay.m_Origin.z += zOffset;
                     return true;
                 }
             }
@@ -117,6 +112,8 @@ namespace touchscreen {
                 return false;
         }
 
+        public static bool ADD_OFFSET = false;
+        
         internal void OnPlayerInteraction(bool isAlt) {
             PlayerControllerB ply = LOCAL_PLAYER;
             if (ply != null && Plugin.IsActive && IsLookingAtMonitor(out Bounds bounds, out Ray lookRay, out Ray camRay)) {
@@ -124,11 +121,12 @@ namespace touchscreen {
                 // if (_dbgDraw == 2) {
                 //     _dbgRenderer.SetPositions(new[] {
                 //         camRay.origin,
-                //         camRay.GetPoint(10),
+                //         camRay.GetPoint(GROUND_DISTANCE),
                 //     });
                 // }
                 
-                foreach (Collider x in Physics.OverlapCapsule(camRay.GetPoint(0), camRay.GetPoint(10), _isCloseMax)) {
+                Plugin.ORBITAL_OFFSET.Invoke(ref camRay.m_Origin); // Fix GI weird camera raycast offset
+                foreach (Collider x in Physics.OverlapCapsule(camRay.origin, camRay.GetPoint(GROUND_DISTANCE), _isCloseMax)) {
                     if (!isAlt && x.GetComponent<TerminalAccessibleObject>() is { } tObject) { // Clicked on BigDoor, Land mine, Turret
                         tObject.CallFunctionFromTerminal();
                         return;
