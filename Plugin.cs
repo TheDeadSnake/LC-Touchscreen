@@ -20,13 +20,15 @@ public class Plugin : BaseUnityPlugin {
     internal static ManualLogSource LOGGER;
     internal delegate R Func<R, T>(T value);
     internal delegate R Supplier<R>();
+    internal delegate void Consumer<T>(ref T value);
 
     // GeneralImprovements - support
     internal static Func<Bounds, GameObject> CREATE_BOUNDS;
+    internal static Consumer<Vector3> ORBITAL_OFFSET;
 
     // 3rd party plugin support (to disable/enable this plugin)
     private static bool _override = true;
-    private static bool _onPlanet = false;
+    private static bool _onPlanet;
     public static bool IsActive {
         get => _onPlanet && (_override || ConfigUtil.IGNORE_OVERRIDE);
         set {
@@ -51,6 +53,10 @@ public class Plugin : BaseUnityPlugin {
             GameObject obj = StartOfRound.Instance?.mapScreen?.mesh.gameObject;
             if (obj != null && obj.GetComponent<ScreenScript>() == null) {
                 obj.AddComponent<ScreenScript>();
+                
+                // DBG
+                // ScreenScript ssr = obj.AddComponent<ScreenScript>();
+                // ssr.dbg(false); 
             }
             _onPlanet = true;
         }
@@ -61,6 +67,16 @@ public class Plugin : BaseUnityPlugin {
             _onPlanet = false;
     }
 
+    private void NOffset(ref Vector3 pos) {
+        pos.x += 1.5f;
+        pos.z += 0.05f;
+    }
+
+    private void GIOffset(ref Vector3 pos) {
+        pos.x += 2.6f;
+        pos.z += 0f;
+    }
+    
     // Plugin Startup
     private void Awake() {
         LOGGER = this.Logger;
@@ -69,7 +85,7 @@ public class Plugin : BaseUnityPlugin {
         SceneManager.sceneUnloaded += OnSceneUnloaded;
 
         // Load config values
-        ConfigUtil.Setup(this.Config, pluginFolder);
+        ConfigUtil.Setup(Config, pluginFolder);
         InputUtil.Setup();
 
         // GeneralImprovements support
@@ -83,6 +99,7 @@ public class Plugin : BaseUnityPlugin {
                 ),
                 new Vector3(0, 1.05f, 1.36f)
             );
+            ORBITAL_OFFSET = GIOffset;
             LOGGER.LogInfo($" > Hooked into GeneralImprovements {gi.Metadata.Version}");
         } else {
             CREATE_BOUNDS = x => new Bounds(
@@ -93,6 +110,7 @@ public class Plugin : BaseUnityPlugin {
                 ),
                 new Vector3(0, 1.05f, 1.36f)
             );
+            ORBITAL_OFFSET = NOffset;
         }
 
         // ToilHead support
